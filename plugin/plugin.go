@@ -345,10 +345,16 @@ func createDeployment(payload DeploymentPayload, cloudID, debug, oauthToken stri
 	if err != nil {
 		return err
 	}
+	jsonpayload, err3 := json.Marshal(payload)
+	fmt.Println(string(jsonpayload))
+	fmt.Println(err3)
 	req.Header.Set("From", "noreply@localhost")
 	req.Header.Set("Authorization", "Bearer "+oauthToken)
 	req.Header.Set("Content-Type", "application/json")
 	res, err := http.DefaultClient.Do(req)
+	jsonresponse, err1 := json.Marshal(res)
+	fmt.Println(string(jsonresponse))
+	fmt.Println(err1)
 	if err != nil {
 		return err
 	}
@@ -407,10 +413,16 @@ func createConnectBuild(payload BuildPayload, cloudID, debug, jwtToken string) e
 	if err != nil {
 		return err
 	}
+	jsonpayload, err3 := json.Marshal(payload)
+	fmt.Println(string(jsonpayload))
+	fmt.Println(err3)
 	req.Header.Set("From", "noreply@localhost")
 	req.Header.Set("Authorization", "Bearer "+jwtToken)
 	req.Header.Set("Content-Type", "application/json")
 	res, err := http.DefaultClient.Do(req)
+	jsonresponse, err2 := json.Marshal(res)
+	fmt.Println(string(jsonresponse))
+	fmt.Println(err2)
 	if err != nil {
 		return err
 	}
