@@ -90,7 +90,6 @@ func Exec(ctx context.Context, args Args) error {
 
 	// ExtractInstanceName extracts the instance name from the provided URL if any
 	instanceName := ExtractInstanceName(args.Instance)
-	fmt.Println("&&&&Instance value is:", args.Instance)
 
 	logger := logrus.
 		WithField("client_id", args.ClientID).
@@ -387,6 +386,10 @@ func createConnectDeployment(payload DeploymentPayload, cloudID, debug, jwtToken
 	if err := json.NewEncoder(buf).Encode(payload); err != nil {
 		return err
 	}
+	fmt.Println("*************1- DEPLOYMENT ****************")
+	jsonpayload, err3 := json.Marshal(payload)
+	fmt.Println(string(jsonpayload))
+	fmt.Println(err3)
 	req, err := http.NewRequest("POST", endpoint, buf)
 	if err != nil {
 		return err
@@ -399,6 +402,16 @@ func createConnectDeployment(payload DeploymentPayload, cloudID, debug, jwtToken
 		return err
 	}
 	defer res.Body.Close()
+	fmt.Println("Response Status:", res.Status)
+	// Read the response body
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println("Error reading response body:", err)
+		return err
+	}
+
+	// Print the response body
+	fmt.Println("Response Body:", string(body))
 	switch debug {
 	case "debug", "trace", "DEBUG", "TRACE":
 		out, _ := httputil.DumpResponse(res, true)
