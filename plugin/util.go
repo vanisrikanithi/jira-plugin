@@ -113,6 +113,7 @@ func ExtractInstanceName(instance string) string {
 		}
 	}
 	// Default return if no valid instance name is found
+
 	return instance
 }
 

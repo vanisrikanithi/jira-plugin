@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"strconv"
@@ -89,6 +90,7 @@ func Exec(ctx context.Context, args Args) error {
 
 	// ExtractInstanceName extracts the instance name from the provided URL if any
 	instanceName := ExtractInstanceName(args.Instance)
+	fmt.Println("&&&&Instance value is:", args.Instance)
 
 	logger := logrus.
 		WithField("client_id", args.ClientID).
@@ -101,6 +103,7 @@ func Exec(ctx context.Context, args Args) error {
 		WithField("environment Type", environmentType).
 		WithField("environment ID", environmentID)
 
+	fmt.Println(instanceName)
 	//check if PLUGIN_ISSUEKEYS is provided
 	if len(args.IssueKeys) > 0 {
 		issues = args.IssueKeys
@@ -231,9 +234,13 @@ func Exec(ctx context.Context, args Args) error {
 		jwtToken, err := getConnectToken(args.ConnnectKey, args.ConnectHostname)
 		if err != nil {
 			logger.Debugln("cannot get jwt token, from connect key")
+			fmt.Println("*************cannot get jwt token, from connect key")
 			return err
 		}
+		fmt.Println("HELLO")
+		fmt.Println(args.EnvironmentName)
 		if args.EnvironmentName != "" {
+			fmt.Println("In If  creating deployment")
 			logger.Infoln("creating deployment")
 			deploymentErr := createConnectDeployment(deploymentPayload, instanceName, args.Level, jwtToken)
 			if deploymentErr != nil {
@@ -242,6 +249,7 @@ func Exec(ctx context.Context, args Args) error {
 				return deploymentErr
 			}
 		} else {
+			fmt.Println("In else creating build")
 			logger.Infoln("creating build")
 			buildErr := createConnectBuild(buildPayload, instanceName, args.Level, jwtToken)
 			if buildErr != nil {
@@ -345,6 +353,7 @@ func createDeployment(payload DeploymentPayload, cloudID, debug, oauthToken stri
 	if err != nil {
 		return err
 	}
+	fmt.Println("*************VANI: DEPLOYMENT****************")
 	jsonpayload, err3 := json.Marshal(payload)
 	fmt.Println(string(jsonpayload))
 	fmt.Println(err3)
@@ -406,6 +415,8 @@ func createConnectDeployment(payload DeploymentPayload, cloudID, debug, jwtToken
 func createConnectBuild(payload BuildPayload, cloudID, debug, jwtToken string) error {
 	endpoint := fmt.Sprintf("https://%s.atlassian.net/rest/builds/0.1/bulk", cloudID)
 	buf := new(bytes.Buffer)
+	fmt.Println("endpoint")
+	fmt.Println("*************BUILDINFO****************")
 	if err := json.NewEncoder(buf).Encode(payload); err != nil {
 		return err
 	}
@@ -413,6 +424,7 @@ func createConnectBuild(payload BuildPayload, cloudID, debug, jwtToken string) e
 	if err != nil {
 		return err
 	}
+	fmt.Println("*************1- BUILDINFO****************")
 	jsonpayload, err3 := json.Marshal(payload)
 	fmt.Println(string(jsonpayload))
 	fmt.Println(err3)
@@ -420,13 +432,24 @@ func createConnectBuild(payload BuildPayload, cloudID, debug, jwtToken string) e
 	req.Header.Set("Authorization", "Bearer "+jwtToken)
 	req.Header.Set("Content-Type", "application/json")
 	res, err := http.DefaultClient.Do(req)
-	jsonresponse, err2 := json.Marshal(res)
-	fmt.Println(string(jsonresponse))
-	fmt.Println(err2)
+
 	if err != nil {
+		fmt.Println("Error encountered:", err)
 		return err
 	}
 	defer res.Body.Close()
+	// Print the response status
+	fmt.Println("Response Status:", res.Status)
+	// Read the response body
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println("Error reading response body:", err)
+		return err
+	}
+
+	// Print the response body
+	fmt.Println("Response Body:", string(body))
+
 	switch debug {
 	case "debug", "trace", "DEBUG", "TRACE":
 		out, _ := httputil.DumpResponse(res, true)
