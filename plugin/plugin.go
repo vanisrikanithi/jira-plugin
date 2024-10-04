@@ -128,7 +128,7 @@ func Exec(ctx context.Context, args Args) error {
 			{
 				Deploymentsequencenumber: args.Build.Number,
 				Updatesequencenumber:     args.Build.Number,
-				IssueKeys:                issues,
+				//	IssueKeys:                issues,
 				Associations: []Association{
 					{
 						Associationtype: "issueIdOrKeys",
